@@ -59,7 +59,7 @@ async function createXpCard(username, xp, level, nextLevelXP, rank, avatarURL, s
 
     ctx.fillText(`RANK #${rank}`, 597, 65);
 
-    ctx.fillStyle = '#8A63FF';
+    // Dibujar texto de Nivel
     ctx.fillText(`LEVEL ${level}`, 754, 65);
 
     ctx.fillStyle = '#252A2F';
@@ -67,20 +67,19 @@ async function createXpCard(username, xp, level, nextLevelXP, rank, avatarURL, s
     ctx.roundRect(234, 148, 632, 36, 18);
     ctx.fill();
 
-    const xpPercentage = (xp / nextLevelXP) * 632;
+    const minXPWidth = 40;
+    const xpWidth = Math.max(minXPWidth, (xp / nextLevelXP) * 632);
 
-    if (xpPercentage > 0) {
-        ctx.fillStyle = '#8A63FF';
-        ctx.beginPath();
+    ctx.fillStyle = '#8A63FF';
+    ctx.beginPath();
 
-        if (xpPercentage < 36) {
-            ctx.roundRect(234, 148, xpPercentage, 36, { tl: 18, tr: 0, br: 0, bl: 18 });
-        } else {
-            ctx.roundRect(234, 148, xpPercentage, 36, 18);
-        }
-
-        ctx.fill();
+    if (xpWidth <= minXPWidth) {
+        ctx.roundRect(234, 148, minXPWidth, 36, 18);
+    } else {
+        ctx.roundRect(234, 148, xpWidth, 36, 18);
     }
+
+    ctx.fill();
 
     return canvas.toBuffer();
 }
