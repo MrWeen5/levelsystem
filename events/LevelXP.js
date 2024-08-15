@@ -19,12 +19,6 @@ class XpSystem {
         this.cooldowns.set(userId, Date.now());
     }
 
-    // Verifica si el mensaje debe ser ignorado
-    static shouldIgnoreMessage(message) {
-        // Aquí puedes agregar lógica para ignorar mensajes en ciertos canales o de ciertos roles
-        return false; // Por ahora, no ignoramos ningún mensaje
-    }
-
     // Obtiene o crea el perfil del usuario dentro del array de levels
     static async fetchOrCreateUserProfile(guildId, userId, username) {
         let userProfile = await UserProfile.findOne({ userId });
@@ -104,9 +98,6 @@ module.exports = {
 
         try {
             const { id: guildId } = message.guild;
-
-            // Verifica si el mensaje debe ser ignorado
-            if (XpSystem.shouldIgnoreMessage(message)) return;
 
             // Obtiene o crea el perfil del usuario
             const userProfile = await XpSystem.fetchOrCreateUserProfile(guildId, userId, username);
