@@ -14,7 +14,7 @@ const UserProfileSchema = new Schema({
   levels: [levels]  // Array de perfiles por servidor
 });
 
-// Crear un índice único en userId y guildId dentro de guildProfiles
-UserProfileSchema.index({ userId: 1, 'guildProfiles.guildId': 1 }, { unique: true });
+// Crear un índice único en userId y guildId dentro de levels
+UserProfileSchema.index({ userId: 1, 'levels.guildId': 1 }, { unique: true });
 
 module.exports = mongoose.model('UserProfile', UserProfileSchema);
