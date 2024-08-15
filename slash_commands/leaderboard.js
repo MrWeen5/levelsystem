@@ -11,7 +11,7 @@ module.exports = {
         const guildId = interaction.guild.id;
 
         try {
-            // Obtener los perfiles de usuario de este servidor, ordenados por nivel y XP
+            // Obtener los perfiles de usuario de este servidor, ordenados por nivel, XP y cantidad de mensajes
             const topUsers = await getTopUsers(guildId);
 
             if (topUsers.length === 0) {
@@ -28,7 +28,7 @@ module.exports = {
             topUsers.forEach((user, index) => {
                 leaderboardEmbed.addFields({
                     name: `#${index + 1} - ${user.username}`,
-                    value: `Nivel: ${user.level} | XP: ${user.xp}`,
+                    value: `Nivel: ${user.level} | XP: ${user.xp} | Mensajes: ${user.messages}`,
                     inline: false
                 });
             });
@@ -50,12 +50,13 @@ async function getTopUsers(guildId) {
         { $match: { 'levels.guildId': guildId } },
         { $sort: { 'levels.level': -1, 'levels.xp': -1 } }, // Ordenar por nivel y luego por XP
         { $limit: 10 }, // Limitar a los 10 mejores usuarios
-        { $project: { username: 1, 'levels.level': 1, 'levels.xp': 1 } }
+        { $project: { username: 1, 'levels.level': 1, 'levels.xp': 1, 'levels.messages': 1 } }
     ]);
 
     return users.map(user => ({
         username: user.username,
         level: user.levels.level,
-        xp: user.levels.xp
+        xp: user.levels.xp,
+        messages: user.levels.messages
     }));
 }
