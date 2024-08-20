@@ -1,10 +1,6 @@
-const { createCanvas, loadImage, registerFont } = require('canvas');
-const path = require('path');
+const { createCanvas, loadImage } = require('canvas');
 
 // Registrar la fuente antes de crear el canvas
-registerFont(path.join(__dirname, 'fonts/Inter-Regular.ttf'), { family: 'Inter' });
-registerFont(path.join(__dirname, 'fonts/Inter-Bold.ttf'), { family: 'Inter', weight: 'bold' });
-
 async function createXpCard(username, xp, level, nextLevelXP, rank, avatarURL, status) {
     const width = 886;
     const height = 210;

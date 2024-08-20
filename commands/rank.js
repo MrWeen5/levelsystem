@@ -15,7 +15,7 @@ module.exports = {
 
     async execute(interaction) {
         try {
-            await interaction.deferReply(); // Defer the reply to give más tiempo para procesar
+            await interaction.deferReply();
 
             const targetUser = interaction.options.getUser('usuario') || interaction.user;
             const userId = targetUser.id;
@@ -35,7 +35,7 @@ module.exports = {
             const userStatus = await getUserStatus(interaction, targetUser.id);
 
             // Crear la imagen de rango
-            const rankImageBuffer = await createXpCard(targetUser.username, xp, level, nextLevelXP, rank, avatarURL, userStatus);
+            const rankImageBuffer = await createXpCard(targetUser.displayName, xp, level, nextLevelXP, rank, avatarURL, userStatus);
             const attachment = new AttachmentBuilder(rankImageBuffer, { name: 'rank.png' });
 
             // Enviar la respuesta con la imagen de rango
