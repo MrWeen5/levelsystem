@@ -32,11 +32,21 @@ module.exports = {
 
             // Obtener la URL del avatar del usuario y su estado
             const avatarURL = targetUser.displayAvatarURL({ format: 'png' });
-            console.log(targetUser.displayAvatarURL({ format: 'png' }))
+            
+            console.log(avatarURL)
+
             const userStatus = await getUserStatus(interaction, targetUser.id);
 
             // Crear la imagen de rango
-            const rankImageBuffer = await createXpCard(targetUser.displayName, xp, level, nextLevelXP, rank, avatarURL, userStatus);
+            const rankImageBuffer = await createXpCard(
+                targetUser.displayName, 
+                xp, 
+                level, 
+                nextLevelXP, 
+                rank, 
+                avatarURL, 
+                userStatus || 'offline'
+            );
             const attachment = new AttachmentBuilder(rankImageBuffer, { name: 'rank.png' });
 
             // Enviar la respuesta con la imagen de rango

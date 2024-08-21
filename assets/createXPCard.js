@@ -1,4 +1,4 @@
-const { createCanvas, loadImage } = require('canvas');
+const { createCanvas, loadImage } = require('@napi-rs/canvas');
 
 // Registrar la fuente antes de crear el canvas
 async function createXpCard(username, xp, level, nextLevelXP, rank, avatarURL, status) {
@@ -12,14 +12,7 @@ async function createXpCard(username, xp, level, nextLevelXP, rank, avatarURL, s
     ctx.roundRect(0, 0, width, height, 20);
     ctx.fill();
 
-    let avatar;
-    try {
-        avatar = await loadImage(avatarURL);
-    } catch (error) {
-        console.error('Error al cargar el avatar:', error.message);
-        return null;
-    }
-    
+    const avatar = await loadImage(avatarURL);
     ctx.save();
     ctx.beginPath();
     ctx.arc(97.5, 105.5, 80.5, 0, Math.PI * 2, true);
@@ -84,7 +77,7 @@ async function createXpCard(username, xp, level, nextLevelXP, rank, avatarURL, s
 
     ctx.fill();
 
-    return canvas.toBuffer();
+    return canvas.toBuffer('image/png');
 }
 
 module.exports = { createXpCard };
