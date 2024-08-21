@@ -12,7 +12,14 @@ async function createXpCard(username, xp, level, nextLevelXP, rank, avatarURL, s
     ctx.roundRect(0, 0, width, height, 20);
     ctx.fill();
 
-    const avatar = await loadImage(avatarURL);
+    let avatar;
+    try {
+        avatar = await loadImage(avatarURL);
+    } catch (error) {
+        console.error('Error al cargar el avatar:', error.message);
+        return null;
+    }
+    
     ctx.save();
     ctx.beginPath();
     ctx.arc(97.5, 105.5, 80.5, 0, Math.PI * 2, true);

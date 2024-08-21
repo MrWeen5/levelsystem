@@ -32,6 +32,7 @@ module.exports = {
 
             // Obtener la URL del avatar del usuario y su estado
             const avatarURL = targetUser.displayAvatarURL({ format: 'png' });
+            console.log(targetUser.displayAvatarURL({ format: 'png' }))
             const userStatus = await getUserStatus(interaction, targetUser.id);
 
             // Crear la imagen de rango
