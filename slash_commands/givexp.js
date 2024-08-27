@@ -17,14 +17,16 @@ module.exports = {
     async execute(interaction) {
         try {
             const guildId = interaction.guild.id;
+            const targetUser = interaction.options.getUser('usuario');
             const userId = interaction.options.getUser('usuario').id;
             const xpAmount = interaction.options.getInteger('cantidad');
 
             // Obtener o crear el perfil del usuario
-            const userProfile = await getUserProfile(guildId, userId);
+            const userProfile = await getUserProfile(guildId, userId, targetUser.username);
+            console.log(targetUser.username);
 
             // Añadir XP al usuario
-            const leveledUp = addXpToUser(userProfile, xpAmount);
+            const leveledUp = addXpToUser(userProfile, xpAmount, guildId);
 
             await userProfile.save();
 
@@ -35,7 +37,7 @@ module.exports = {
 
             // Responder al comando
             await interaction.reply({
-                content: `Se han dado ${xpAmount} XP a ${interaction.options.getUser('usuario').username} y ahora es de nivel ${userProfile.level}.`, 
+                content: `Se han dado ${xpAmount} XP a ${interaction.options.getUser('usuario').username} y ahora es de nivel ${userProfile.levels.find(level => level.guildId === guildId).level}.`, 
                 ephemeral: true 
             });
 
@@ -51,27 +53,39 @@ module.exports = {
 
 
 // Función para obtener o crear el perfil del usuario
-async function getUserProfile(guildId, userId) {
-    let userProfile = await UserProfile.findOne({ guildId, userId });
+async function getUserProfile(guildId, userId, username) {
+    let userProfile = await UserProfile.findOne({ userId });
+
     if (!userProfile) {
         userProfile = new UserProfile({
-            guildId,
             userId,
-            xp: 0,
-            level: 1,
+            username,
+            levels: [{ guildId, xp: 0, level: 1, messages: 1 }]
         });
+    } else {
+        const guildProfile = userProfile.levels.find(level => level.guildId === guildId);
+        if (!guildProfile) {
+            userProfile.levels.push({ guildId, xp: 0, level: 1, messages: 1 });
+        }
     }
+
     return userProfile;
 }
 
 // Función para añadir XP al usuario y verificar si sube de nivel
-function addXpToUser(userProfile, xpAmount) {
-    userProfile.xp += xpAmount;
-    const xpToNextLevel = userProfile.level * 100; // Ejemplo de fórmula para subir de nivel
+function addXpToUser(userProfile, xpAmount, guildId) {
+    const guildProfile = userProfile.levels.find(level => level.guildId === guildId);
+    
+    if (!guildProfile) {
+        throw new Error('Perfil del servidor no encontrado en el perfil del usuario.');
+    }
 
-    if (userProfile.xp >= xpToNextLevel) {
-        userProfile.level += 1;
-        userProfile.xp -= xpToNextLevel;
+    guildProfile.xp += xpAmount;
+    const xpToNextLevel = guildProfile.level * 100; // Ejemplo de fórmula para subir de nivel
+
+    if (guildProfile.xp >= xpToNextLevel) {
+        guildProfile.level += 1;
+        guildProfile.xp -= xpToNextLevel;
         return true; // El usuario subió de nivel
     }
 

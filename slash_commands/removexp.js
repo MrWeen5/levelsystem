@@ -17,25 +17,21 @@ module.exports = {
     async execute(interaction) {
         try {
             const guildId = interaction.guild.id;
-            const userId = interaction.options.getUser('usuario').id;
+            const targetUser = interaction.options.getUser('usuario');
+            const userId = targetUser.id;
             const xpAmount = interaction.options.getInteger('cantidad');
 
             // Obtener el perfil del usuario
-            const userProfile = await getUserProfile(guildId, userId);
-            if (!userProfile) {
-                return interaction.reply({
-                    content: 'El usuario no tiene un perfil registrado.', 
-                    ephemeral: true 
-                });
-            }
+            const userProfile = await getUserProfile(guildId, userId, targetUser.username);
 
-            // Quitar XP y asegurar que no sea negativo
-            const updatedXp = removeXpFromUser(userProfile, xpAmount);
+            // Quitar XP al usuario
+            const updatedXp = removeXpFromUser(userProfile, xpAmount, guildId);
+
             await userProfile.save();
 
             // Responder al comando
             await interaction.reply({
-                content: `Se han quitado ${xpAmount} XP a ${interaction.options.getUser('usuario').username}. (XP restante: ${updatedXp})`, 
+                content: `Se han quitado ${xpAmount} XP a ${targetUser.username}. (XP restante: ${updatedXp})`, 
                 ephemeral: true 
             });
 
@@ -49,13 +45,40 @@ module.exports = {
     },
 };
 
-// Función para obtener el perfil del usuario
-async function getUserProfile(guildId, userId) {
-    return await UserProfile.findOne({ guildId, userId });
+// Función para obtener o crear el perfil del usuario
+async function getUserProfile(guildId, userId, username) {
+    let userProfile = await UserProfile.findOne({ userId });
+
+    if (!userProfile) {
+        userProfile = new UserProfile({
+            userId,
+            username,
+            levels: [{ guildId, xp: 0, level: 1, messages: 1 }]
+        });
+    } else {
+        const guildProfile = userProfile.levels.find(level => level.guildId === guildId);
+        if (!guildProfile) {
+            userProfile.levels.push({ guildId, xp: 0, level: 1, messages: 1 });
+        }
+    }
+
+    return userProfile;
 }
 
 // Función para quitar XP al usuario y asegurarse de que no sea negativo
-function removeXpFromUser(userProfile, xpAmount) {
-    userProfile.xp = Math.max(userProfile.xp - xpAmount, 0);
-    return userProfile.xp;
+function removeXpFromUser(userProfile, xpAmount, guildId) {
+    const guildProfile = userProfile.levels.find(level => level.guildId === guildId);
+    
+    if (!guildProfile) {
+        throw new Error('Perfil del servidor no encontrado en el perfil del usuario.');
+    }
+
+    guildProfile.xp = Math.max(guildProfile.xp - xpAmount, 0);
+
+    // Ajustar el nivel si es necesario
+    while (guildProfile.level > 1 && guildProfile.xp < (guildProfile.level - 1) * 100) {
+        guildProfile.level -= 1;
+    }
+
+    return guildProfile.xp;
 }
